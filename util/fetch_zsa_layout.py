@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
+import argparse
 import os
-import zipfile
-import urllib.request
 import shutil
+import tempfile
+import urllib.request
+import zipfile
 
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
@@ -79,30 +81,35 @@ def sync_directory(source, destination):
     shutil.copytree(source, destination, dirs_exist_ok=True)
 
 
-# Execute the query on the transport
-result = client.execute(
-    query,
-    variable_values={
-        "hashId": "lzxz0",
-        "geometry": "ergodox-ez",
-        "revisionId": "latest",
-    },
-)
-import pprint
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--hash-id", help="Layout revision hash ID")
+    parser.add_argument(
+        "--keyboard-folder", help="Path within keyboards/ up to keymaps parent"
+    )
+    parser.add_argument("--keymap-folder", help="Name of the keymap folder")
+    parser.add_argument("--geometry", default="ergodox-ez", help="Layout geometry")
+    args = parser.parse_args()
 
-pprint.pprint(result)
+    result = client.execute(
+        query,
+        variable_values={
+            "hashId": args.hash_id,
+            "geometry": args.geometry,
+            "revisionId": "latest",
+        },
+    )
 
-zip_url = result["Layout"]["revision"]["zipUrl"]
-temp_directory = "/tmp/layout/"
+    zip_url = result["Layout"]["revision"]["zipUrl"]
+    with tempfile.TemporaryDirectory() as temp_directory:
+        local_zip_path = download_locally(zip_url, temp_directory)
+        unzip(local_zip_path, temp_directory)
+        source_directory_origin_name = infer_source_directory_from_zip_url(zip_url)
+        destination_directory_path = path_within_firmware_repo(
+            os.path.join("keyboards", args.keyboard_folder, "keymaps", args.keymap_folder)
+        )
 
-local_zip_path = download_locally(zip_url, temp_directory)
-unzip(local_zip_path, temp_directory)
-source_directory_origin_name = infer_source_directory_from_zip_url(zip_url)
-destination_directory_path = path_within_firmware_repo(
-    "keyboards/ergodox_ez/shine/keymaps/freevoid_main/"
-)
-
-sync_directory(
-    os.path.join(temp_directory, source_directory_origin_name),
-    destination_directory_path,
-)
+        sync_directory(
+            os.path.join(temp_directory, source_directory_origin_name),
+            destination_directory_path,
+        )
