@@ -26,7 +26,7 @@ client = Client(transport=transport, fetch_schema_from_transport=True)
 query = gql(
     """
     query getLayout($hashId: String!, $revisionId: String!, $geometry: String) {
-  Layout(hashId: $hashId, geometry: $geometry, revisionId: $revisionId) {
+  layout(hashId: $hashId, geometry: $geometry, revisionId: $revisionId) {
     ...LayoutData
     __typename
   }
@@ -100,7 +100,7 @@ if __name__ == "__main__":
         },
     )
 
-    zip_url = result["Layout"]["revision"]["zipUrl"]
+    zip_url = result["layout"]["revision"]["zipUrl"]
     with tempfile.TemporaryDirectory() as temp_directory:
         local_zip_path = download_locally(zip_url, temp_directory)
         unzip(local_zip_path, temp_directory)
