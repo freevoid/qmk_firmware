@@ -49,11 +49,12 @@
 
 enum custom_keycodes {
   RGB_SLD = EZ_SAFE_RANGE,
+  ST_MACRO_0,
 };
+
 
 enum tap_dance_codes {
   DANCE_0,
-  DANCE_1,
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -61,9 +62,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_ESCAPE,      KC_EXLM,        KC_AT,          KC_HASH,        KC_DLR,         KC_PERC,        KC_LEFT,                                        KC_RIGHT,       KC_CIRC,        KC_AMPR,        KC_ASTR,        KC_MINUS,       KC_EQUAL,       KC_BSPACE,
     KC_TAB,         KC_Q,           KC_W,           KC_F,           KC_P,           KC_B,           KC_DELETE,                                      LSFT(KC_INSERT),KC_J,           KC_L,           KC_U,           KC_Y,           KC_SCOLON,      KC_BSLASH,
     KC_GRAVE,       LT(2,KC_A),     KC_R,           KC_S,           KC_T,           KC_G,                                                                           KC_M,           KC_N,           KC_E,           KC_I,           KC_O,           KC_QUOTE,
-    OSM(MOD_LSFT),  MT(MOD_LCTL, KC_Z),KC_X,           KC_C,           KC_D,           KC_V,           MT(MOD_LSFT, KC_ESCAPE),                                MT(MOD_RSFT, KC_ESCAPE),KC_K,           KC_H,           KC_COMMA,       KC_DOT,         MT(MOD_LCTL, KC_SLASH),OSM(MOD_RSFT),
-    KC_LCTRL,       KC_LGUI,        LM(5,MOD_LGUI), MT(MOD_LALT, KC_LEFT),OSL(1),                                                                                                         TT(1),          MT(MOD_RALT, KC_RIGHT),KC_TRANSPARENT, TG(3),          KC_RCTRL,
-                                                                                                    MT(MOD_LCTL, KC_ESCAPE),KC_LGUI,        KC_RGUI,        MT(MOD_LCTL, KC_ESCAPE),
+    OSM(MOD_LSFT),  MT(MOD_LCTL, KC_Z),KC_X,           KC_C,           KC_D,           KC_V,           MT(MOD_LSFT, KC_ESCAPE),                                OSM(MOD_LSFT),  KC_K,           KC_H,           KC_COMMA,       KC_DOT,         MT(MOD_LCTL, KC_SLASH),OSM(MOD_RSFT),
+    LM(5,MOD_LCTL), KC_TRANSPARENT, LM(5,MOD_LGUI), MT(MOD_LALT, KC_LEFT),OSL(1),                                                                                                         TT(1),          MT(MOD_RALT, KC_RIGHT),KC_TRANSPARENT, TG(3),          KC_RCTRL,
+                                                                                                    KC_UP,          KC_LGUI,        ST_MACRO_0,     KC_DOWN,
                                                                                                                     KC_HOME,        KC_PGUP,
                                                                                     KC_SPACE,       KC_BSPACE,      KC_END,         KC_PGDOWN,      KC_TAB,         KC_ENTER
   ),
@@ -71,7 +72,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_ESCAPE,      KC_F1,          KC_F2,          KC_F3,          KC_F4,          KC_F5,          KC_TRANSPARENT,                                 KC_TRANSPARENT, KC_F6,          KC_F7,          KC_F8,          KC_F9,          KC_F10,         KC_F11,
     KC_TRANSPARENT, KC_EXLM,        KC_AT,          KC_LCBR,        KC_RCBR,        KC_PIPE,        KC_TRANSPARENT,                                 KC_TRANSPARENT, KC_BSLASH,      KC_7,           KC_8,           KC_9,           KC_ASTR,        KC_F12,
     KC_TRANSPARENT, TD(DANCE_0),    KC_DLR,         KC_LPRN,        KC_RPRN,        KC_GRAVE,                                                                       KC_PLUS,        KC_4,           KC_5,           KC_6,           KC_MINUS,       KC_TRANSPARENT,
-    KC_TRANSPARENT, TD(DANCE_1),    KC_CIRC,        KC_LBRACKET,    KC_RBRACKET,    KC_TILD,        KC_TRANSPARENT,                                 KC_TRANSPARENT, KC_0,           KC_1,           KC_2,           KC_3,           KC_TRANSPARENT, KC_TRANSPARENT,
+    KC_TRANSPARENT, KC_TRANSPARENT, KC_CIRC,        KC_LBRACKET,    KC_RBRACKET,    KC_TILD,        KC_TRANSPARENT,                                 KC_TRANSPARENT, KC_0,           KC_1,           KC_2,           KC_3,           KC_TRANSPARENT, KC_TRANSPARENT,
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, TO(0),                                                                                                          KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
                                                                                                     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT,
                                                                                                                     KC_TRANSPARENT, KC_TRANSPARENT,
@@ -121,6 +122,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 
 
+
 rgblight_config_t rgblight_config;
 bool disable_layer_color = 0;
 
@@ -128,6 +130,11 @@ bool suspended = false;
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
+    case ST_MACRO_0:
+    if (record->event.pressed) {
+      SEND_STRING(SS_LGUI(SS_TAP(X_L)));
+    }
+    break;
 
     case RGB_SLD:
       if (record->event.pressed) {
@@ -184,42 +191,42 @@ uint8_t layer_state_set_user(uint8_t state) {
         if(!disable_layer_color) {
           rgblight_enable_noeeprom();
           rgblight_mode_noeeprom(1);
-          rgblight_sethsv_noeeprom(141,255,238);
+          rgblight_sethsv_noeeprom(141,255,rgblight_get_val());
         }
         break;
       case 1:
         if(!disable_layer_color) {
           rgblight_enable_noeeprom();
           rgblight_mode_noeeprom(1);
-          rgblight_sethsv_noeeprom(197,255,255);
+          rgblight_sethsv_noeeprom(197,255,rgblight_get_val());
         }
         break;
       case 2:
         if(!disable_layer_color) {
           rgblight_enable_noeeprom();
           rgblight_mode_noeeprom(1);
-          rgblight_sethsv_noeeprom(73,255,181);
+          rgblight_sethsv_noeeprom(73,255,rgblight_get_val());
         }
         break;
       case 3:
         if(!disable_layer_color) {
           rgblight_enable_noeeprom();
           rgblight_mode_noeeprom(1);
-          rgblight_sethsv_noeeprom(211,255,255);
+          rgblight_sethsv_noeeprom(211,255,rgblight_get_val());
         }
         break;
       case 4:
         if(!disable_layer_color) {
           rgblight_enable_noeeprom();
           rgblight_mode_noeeprom(1);
-          rgblight_sethsv_noeeprom(0,255,255);
+          rgblight_sethsv_noeeprom(0,255,rgblight_get_val());
         }
         break;
       case 5:
         if(!disable_layer_color) {
           rgblight_enable_noeeprom();
           rgblight_mode_noeeprom(1);
-          rgblight_sethsv_noeeprom(141,171,255);
+          rgblight_sethsv_noeeprom(142,177,rgblight_get_val());
         }
         break;
       default:
@@ -243,6 +250,7 @@ void keyboard_post_init_user(void) {
   layer_state_set_user(layer_state);
 }
 
+
 typedef struct {
     bool is_press_action;
     uint8_t step;
@@ -257,7 +265,7 @@ enum {
     MORE_TAPS
 };
 
-static tap dance_state[2];
+static tap dance_state[1];
 
 uint8_t dance_step(qk_tap_dance_state_t *state);
 
@@ -309,43 +317,7 @@ void dance_0_reset(qk_tap_dance_state_t *state, void *user_data) {
     }
     dance_state[0].step = 0;
 }
-void on_dance_1(qk_tap_dance_state_t *state, void *user_data);
-void dance_1_finished(qk_tap_dance_state_t *state, void *user_data);
-void dance_1_reset(qk_tap_dance_state_t *state, void *user_data);
-
-void on_dance_1(qk_tap_dance_state_t *state, void *user_data) {
-    if(state->count == 3) {
-        tap_code16(KC_PERC);
-        tap_code16(KC_PERC);
-        tap_code16(KC_PERC);
-    }
-    if(state->count > 3) {
-        tap_code16(KC_PERC);
-    }
-}
-
-void dance_1_finished(qk_tap_dance_state_t *state, void *user_data) {
-    dance_state[1].step = dance_step(state);
-    switch (dance_state[1].step) {
-        case SINGLE_TAP: register_code16(KC_PERC); break;
-        case SINGLE_HOLD: register_code16(KC_LCTRL); break;
-        case DOUBLE_TAP: register_code16(KC_PERC); register_code16(KC_PERC); break;
-        case DOUBLE_SINGLE_TAP: tap_code16(KC_PERC); register_code16(KC_PERC);
-    }
-}
-
-void dance_1_reset(qk_tap_dance_state_t *state, void *user_data) {
-    wait_ms(10);
-    switch (dance_state[1].step) {
-        case SINGLE_TAP: unregister_code16(KC_PERC); break;
-        case SINGLE_HOLD: unregister_code16(KC_LCTRL); break;
-        case DOUBLE_TAP: unregister_code16(KC_PERC); break;
-        case DOUBLE_SINGLE_TAP: unregister_code16(KC_PERC); break;
-    }
-    dance_state[1].step = 0;
-}
 
 qk_tap_dance_action_t tap_dance_actions[] = {
         [DANCE_0] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_0, dance_0_finished, dance_0_reset),
-        [DANCE_1] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_1, dance_1_finished, dance_1_reset),
 };
